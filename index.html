@@ -6,8 +6,6 @@
     <title>Analisador SEO Pro — Web Journalism Tool</title>
     <meta name="description" content="Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -570,35 +568,51 @@
             .score-categories { grid-template-columns: 1fr 1fr; }
         }
 
-        /* ── PDF Export Mode (High Contrast Light Mode) ── */
-        body.pdf-mode-active #results { background-color: #ffffff !important; color: #0f172a !important; }
-        body.pdf-mode-active #results .section-title { color: #0f172a !important; border-bottom: 2px solid #e2e8f0 !important; }
-        body.pdf-mode-active #results .field-label { color: #475569 !important; font-weight: 600 !important; }
-        body.pdf-mode-active #results .field-value { color: #0f172a !important; font-weight: 700 !important; }
-        body.pdf-mode-active #results .field-value.truncate { color: #475569 !important; font-weight: 500 !important; }
-        body.pdf-mode-active #results .field-card, 
-        body.pdf-mode-active #results .stat-card, 
-        body.pdf-mode-active #results .score-panel, 
-        body.pdf-mode-active #results .score-cat {
-            background-color: #f8fafc !important;
-            border: 1px solid #cbd5e1 !important;
-            color: #0f172a !important;
+        /* ── NATIVE PDF EXPORT MODE (Print Stylesheet) ── */
+        @media print {
+            body { background: #ffffff !important; color: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .top-bar, .search-bar, .header p, .pdf-actions, #loading { display: none !important; }
+            .container { padding: 0 !important; margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
+            .header h1 { color: #0f172a !important; font-size: 24px !important; margin-bottom: 5px !important; }
+            
+            #printHeader { display: block !important; margin-bottom: 24px; }
+            #printHeader .print-meta { font-size: 11px; color: #475569; line-height: 1.6; }
+            #printHeader hr { border: none; border-bottom: 2px solid #e2e8f0; margin-top: 12px; }
+
+            #results { padding: 0 !important; margin: 0 !important; }
+            #results .section-title { color: #0f172a !important; border-bottom: 2px solid #e2e8f0 !important; break-after: avoid; }
+            #results .field-label { color: #475569 !important; font-weight: 600 !important; }
+            #results .field-value { color: #0f172a !important; font-weight: 700 !important; }
+            #results .field-value.truncate { color: #475569 !important; font-weight: 500 !important; display: block; -webkit-line-clamp: none; line-clamp: none; max-height: none; }
+            
+            #results .field-card, 
+            #results .stat-card, 
+            #results .score-panel, 
+            #results .score-cat {
+                background-color: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+                break-inside: avoid;
+            }
+            #results .field-header { border-bottom: 1px solid #e2e8f0 !important; }
+            #results .score-label { color: #0f172a !important; font-weight: 800 !important; }
+            #results .score-sublabel { color: #64748b !important; }
+            #results .score-gauge .track { stroke: #e2e8f0 !important; }
+            #results .score-max { color: #64748b !important; }
+            #results .penalty-item { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; break-inside: avoid; }
+            #results .penalty-text { color: #881337 !important; font-weight: 600 !important; }
+            #results .penalty-item.warning { background-color: #fffbeb !important; border: 1px solid #fde68a !important; }
+            #results .penalty-item.warning .penalty-text { color: #78350f !important; font-weight: 600 !important; }
+            
+            #results .badge { font-weight: 800 !important; }
+            #results .badge-ok { background-color: #dcfce7 !important; color: #166534 !important; }
+            #results .badge-warn { background-color: #fef3c7 !important; color: #92400e !important; }
+            #results .badge-error { background-color: #fee2e2 !important; color: #991b1b !important; }
+            #results .badge-info { background-color: #dbeafe !important; color: #1e40af !important; }
+            #results .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
+            
+            @page { margin: 15mm; }
         }
-        body.pdf-mode-active #results .field-header { border-bottom: 1px solid #e2e8f0 !important; }
-        body.pdf-mode-active #results .score-label { color: #0f172a !important; font-weight: 800 !important; }
-        body.pdf-mode-active #results .score-sublabel { color: #64748b !important; }
-        body.pdf-mode-active #results .score-gauge .track { stroke: #e2e8f0 !important; }
-        body.pdf-mode-active #results .score-max { color: #64748b !important; }
-        body.pdf-mode-active #results .penalty-item { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
-        body.pdf-mode-active #results .penalty-text { color: #881337 !important; font-weight: 600 !important; }
-        body.pdf-mode-active #results .penalty-item.warning { background-color: #fffbeb !important; border: 1px solid #fde68a !important; }
-        body.pdf-mode-active #results .penalty-item.warning .penalty-text { color: #78350f !important; font-weight: 600 !important; }
-        body.pdf-mode-active #results .badge { font-weight: 800 !important; }
-        body.pdf-mode-active #results .badge-ok { background-color: #dcfce7 !important; color: #166534 !important; }
-        body.pdf-mode-active #results .badge-warn { background-color: #fef3c7 !important; color: #92400e !important; }
-        body.pdf-mode-active #results .badge-error { background-color: #fee2e2 !important; color: #991b1b !important; }
-        body.pdf-mode-active #results .badge-info { background-color: #dbeafe !important; color: #1e40af !important; }
-        body.pdf-mode-active #results .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
     </style>
 </head>
 <body>
@@ -610,7 +624,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.4</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.4.0</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -635,6 +649,14 @@
                 <div class="spinner-small"></div>
                 Baixar Relatório PDF
             </button>
+        </div>
+
+        <div id="printHeader" style="display:none;">
+            <div class="print-meta">
+                <strong>URL:</strong> <span id="printUrlText"></span><br>
+                <strong>Data:</strong> <span id="printDateText"></span>
+            </div>
+            <hr>
         </div>
 
         <!-- Results -->
@@ -1716,146 +1738,46 @@
             }
         }
 
-        // ── Generate PDF ────────────────────────────────────
+        // ── Generate PDF (Native Vector Export) ──────────────────
         async function generatePDF() {
             const btn = document.getElementById('btnDownloadPdf');
-            btn.classList.add('loading');
-            btn.disabled = true;
+            const originalText = btn.innerHTML;
 
             try {
-                // Better detection for jsPDF
-                let jsPDF = null;
-                if (window.jspdf && window.jspdf.jsPDF) {
-                    jsPDF = window.jspdf.jsPDF;
-                } else if (window.jsPDF) {
-                    jsPDF = window.jsPDF;
-                }
+                btn.classList.add('loading');
+                btn.disabled = true;
 
-                console.log('jsPDF Detection:', {
-                    hasWindowJspdf: !!window.jspdf,
-                    hasWindowJsPDF: !!window.jsPDF,
-                    resolved: !!jsPDF
-                });
-
-                if (!jsPDF) {
-                    // One last attempt to find it
-                    if (typeof window.jsPDF === 'function') jsPDF = window.jsPDF;
-                    else throw new Error('Biblioteca jsPDF não encontrada. Verifique sua conexão ou tente recarregar (F5).');
-                }
-                const resultsEl = document.getElementById('results');
-
-                // Force browser to native repaint in Light Mode BEFORE capturing
-                document.body.classList.add('pdf-mode-active');
-                await new Promise(r => setTimeout(r, 50)); // let browser layout settle
-
-                // Capture the results section natively
-                const canvas = await html2canvas(resultsEl, {
-                    backgroundColor: '#ffffff',
-                    scale: 2, // Scale 2 is sufficient for sharpness and keeps size manageable
-                    useCORS: true,
-                    logging: false,
-                    windowWidth: 1100
-                });
-
-                // Revert original theme
-                document.body.classList.remove('pdf-mode-active');
-
-
-                // Compress image to JPEG to drastically reduce file size
-                const imgData = canvas.toDataURL('image/jpeg', 0.85);
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-
-                // A4 dimensions in mm
-                const pdfWidth = 210;
-                const pdfHeight = 297;
-                const margin = 12;
-                const contentWidth = pdfWidth - margin * 2;
-                const contentHeight = (imgHeight * contentWidth) / imgWidth;
-
-                // Create jsPDF with built-in compression enabled
-                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
-
-                // White background for the PDF document
-                pdf.setFillColor(255, 255, 255);
-                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-                
-                // Header (Light Mode)
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(16);
-                pdf.setTextColor(15, 23, 42); // #0f172a
-                pdf.text('Analisador SEO — Relatório', margin, 18);
-
+                // Sync URL and Date info into the native print header
                 const urlText = document.getElementById('urlInput').value.trim();
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(9);
-                pdf.setTextColor(71, 85, 105); // #475569
-                pdf.text(`URL: ${urlText}`, margin, 25);
-                pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, margin, 30);
+                document.getElementById('printUrlText').textContent = urlText;
+                document.getElementById('printDateText').textContent = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                // Separator line (Light Mode)
-                pdf.setDrawColor(226, 232, 240); // #e2e8f0
-                pdf.setLineWidth(0.3);
-                pdf.line(margin, 34, pdfWidth - margin, 34);
+                await new Promise(r => setTimeout(r, 50)); 
 
-                const headerOffset = 38;
-                const availableHeight = pdfHeight - headerOffset - margin;
+                // Temporarily alter the document title to format the saved PDF file name
+                let domain = 'report';
+                try {
+                    if (urlText) domain = new URL(urlText).hostname.replace('www.', '');
+                } catch(e) {}
+                const originalTitle = document.title;
+                document.title = `seo-report-${domain}`;
 
-                if (contentHeight <= availableHeight) {
-                    // Fits in one page
-                    pdf.addImage(imgData, 'JPEG', margin, headerOffset, contentWidth, contentHeight);
-                } else {
-                    // Multiple pages
-                    let yOffset = 0;
-                    let isFirstPage = true;
+                // Trigger browser's native print engine (100% Vector, Zero artifacts, perfect formatting)
+                window.print();
 
-                    while (yOffset < contentHeight) {
-                        if (!isFirstPage) {
-                            pdf.addPage();
-                            pdf.setFillColor(255, 255, 255); // White bg on extra pages
-                            pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-                        }
+                // Restore original document title
+                document.title = originalTitle;
 
-                        const startY = isFirstPage ? headerOffset : margin;
-                        const pageAvail = isFirstPage ? availableHeight : (pdfHeight - margin * 2);
-
-                        // Clip and draw portion of the image
-                        const sourceY = (yOffset / contentHeight) * imgHeight;
-                        const sourceH = (pageAvail / contentHeight) * imgHeight;
-
-                        // Create a temporary canvas to slice
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = imgWidth;
-                        tempCanvas.height = Math.min(sourceH, imgHeight - sourceY);
-                        const ctx = tempCanvas.getContext('2d');
-                        ctx.drawImage(canvas, 0, sourceY, imgWidth, tempCanvas.height, 0, 0, imgWidth, tempCanvas.height);
-
-                        const sliceData = tempCanvas.toDataURL('image/jpeg', 0.85);
-                        const sliceH = (tempCanvas.height * contentWidth) / imgWidth;
-                        pdf.addImage(sliceData, 'JPEG', margin, startY, contentWidth, sliceH);
-
-                        yOffset += pageAvail;
-                        isFirstPage = false;
-                    }
-                }
-
-                // Footer (Light Mode)
-                pdf.setFontSize(7);
-                pdf.setTextColor(100, 116, 139); // #64748b
-                pdf.text('Gerado por Analisador SEO Pro — Web Journalism Tool', margin, pdfHeight - 8);
-
-                // Download
-                const domain = new URL(urlText).hostname.replace('www.', '');
-                pdf.save(`seo-report-${domain}.pdf`);
-
-            } catch (err) {
-                console.error('PDF generation error:', err);
-                alert('Erro ao gerar PDF: ' + err.message);
+            } catch (error) {
+                console.error('Erro na exportação:', error);
+                alert('Ocorreu um erro ao preparar o relatório para exportação.');
             } finally {
                 btn.classList.remove('loading');
                 btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
+
 
         // ── Lang Toggle (stub) ──────────────────────────────
         function setLang(lang) {
