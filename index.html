@@ -1694,7 +1694,8 @@
             btn.disabled = true;
 
             try {
-                const { jsPDF } = window.jspdf;
+                const jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+                if (!jsPDF) throw new Error('Biblioteca jsPDF não encontrada. Verifique sua conexão.');
                 const resultsEl = document.getElementById('results');
 
                 // Capture the results section
