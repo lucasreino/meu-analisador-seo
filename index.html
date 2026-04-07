@@ -580,7 +580,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.2.7</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.0</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -1714,29 +1714,51 @@
                 }
                 const resultsEl = document.getElementById('results');
 
-                // Capture the results section with improved contrast and scale
+                // Capture the results section with a Professional Light Theme specifically for the PDF
                 const canvas = await html2canvas(resultsEl, {
-                    backgroundColor: '#0a0e1a',
-                    scale: 3, // Higher scale for extreme sharpness
+                    backgroundColor: '#ffffff',
+                    scale: 3, 
                     useCORS: true,
                     logging: false,
                     windowWidth: 1100,
                     onclone: (clonedDoc) => {
-                        // Boost contrast for PDF readability
+                        // Override CSS variables specifically for the PDF document (Light Mode)
+                        const root = clonedDoc.documentElement;
                         const results = clonedDoc.getElementById('results');
                         if (results) {
-                            results.style.color = '#ffffff'; // Force white text for better contrast
-                            // Make cards slightly more visible
-                            const cards = results.querySelectorAll('.field-card, .stat-card, .score-panel, .score-cat');
-                            cards.forEach(card => {
-                                card.style.borderColor = '#334155'; // Brighter border
-                                card.style.background = '#1a2333'; // Slightly lighter background for cards
-                            });
-                            // Ensure all badges are bright
-                            const badges = results.querySelectorAll('.badge');
-                            badges.forEach(b => {
-                                b.style.fontWeight = '800';
-                            });
+                            // Light theme color palette
+                            results.setAttribute('style', 'background-color: #ffffff !important; color: #1e293b !important;');
+                            
+                            // Apply light mode variables to the results container scope
+                            results.style.setProperty('--bg-body', '#ffffff');
+                            results.style.setProperty('--bg-card', '#f8fafc');
+                            results.style.setProperty('--bg-field', '#f1f5f9');
+                            results.style.setProperty('--border-card', '#cbd5e1');
+                            results.style.setProperty('--border-field', '#e2e8f0');
+                            results.style.setProperty('--text-primary', '#0f172a');
+                            results.style.setProperty('--text-secondary', '#475569');
+                            results.style.setProperty('--text-muted', '#64748b');
+                            results.style.setProperty('--text-label', '#94a3b8');
+                            
+                            // High contrast badges for light background
+                            results.style.setProperty('--badge-ok-bg', '#d1fae5');
+                            results.style.setProperty('--badge-ok-text', '#065f46');
+                            results.style.setProperty('--badge-warn-bg', '#ffedd5');
+                            results.style.setProperty('--badge-warn-text', '#9a3412');
+                            results.style.setProperty('--badge-error-bg', '#fee2e2');
+                            results.style.setProperty('--badge-error-text', '#991b1b');
+                            results.style.setProperty('--badge-info-bg', '#e0f2fe');
+                            results.style.setProperty('--badge-info-text', '#075985');
+                            results.style.setProperty('--badge-neutral-bg', '#f1f5f9');
+                            results.style.setProperty('--badge-neutral-text', '#475569');
+
+                            // Important for the Gauge visibility in light theme
+                            const gaugeTrack = clonedDoc.querySelector('.score-gauge .track');
+                            if (gaugeTrack) gaugeTrack.style.stroke = '#e2e8f0';
+
+                            // Ensure all texts inside cards are dark
+                            const allTexts = results.querySelectorAll('.field-value, .field-label, .section-title, .score-label');
+                            allTexts.forEach(el => el.style.color = 'inherit');
                         }
                     }
                 });
@@ -1754,23 +1776,25 @@
 
                 const pdf = new jsPDF('p', 'mm', 'a4');
 
-                // Add header on first page
-                pdf.setFillColor(10, 14, 26);
+                // White background for the PDF document
+                pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                
+                // Header (Light Mode)
                 pdf.setFont('helvetica', 'bold');
                 pdf.setFontSize(16);
-                pdf.setTextColor(232, 236, 244);
+                pdf.setTextColor(15, 23, 42); // #0f172a
                 pdf.text('Analisador SEO — Relatório', margin, 18);
 
                 const urlText = document.getElementById('urlInput').value.trim();
                 pdf.setFont('helvetica', 'normal');
                 pdf.setFontSize(9);
-                pdf.setTextColor(132, 146, 166);
+                pdf.setTextColor(71, 85, 105); // #475569
                 pdf.text(`URL: ${urlText}`, margin, 25);
                 pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, margin, 30);
 
-                // Separator line
-                pdf.setDrawColor(30, 42, 58);
+                // Separator line (Light Mode)
+                pdf.setDrawColor(226, 232, 240); // #e2e8f0
                 pdf.setLineWidth(0.3);
                 pdf.line(margin, 34, pdfWidth - margin, 34);
 
@@ -1788,7 +1812,7 @@
                     while (yOffset < contentHeight) {
                         if (!isFirstPage) {
                             pdf.addPage();
-                            pdf.setFillColor(10, 14, 26);
+                            pdf.setFillColor(255, 255, 255); // White bg on extra pages
                             pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
                         }
 
@@ -1815,9 +1839,9 @@
                     }
                 }
 
-                // Footer on last page
+                // Footer (Light Mode)
                 pdf.setFontSize(7);
-                pdf.setTextColor(90, 101, 119);
+                pdf.setTextColor(100, 116, 139); // #64748b
                 pdf.text('Gerado por Analisador SEO Pro — Web Journalism Tool', margin, pdfHeight - 8);
 
                 // Download
