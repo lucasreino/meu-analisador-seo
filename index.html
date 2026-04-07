@@ -339,6 +339,218 @@
             color: var(--text-primary);
         }
 
+        /* ── PDF Download Button ─────────────────── */
+        .pdf-actions {
+            display: none;
+            justify-content: center;
+            margin-bottom: 28px;
+            animation: fadeIn 0.4s ease;
+        }
+        .pdf-actions.active {
+            display: flex;
+        }
+        .btn-download-pdf {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-download-pdf::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-download-pdf:hover::before {
+            left: 100%;
+        }
+        .btn-download-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(59, 130, 246, 0.45);
+        }
+        .btn-download-pdf:active {
+            transform: scale(0.97);
+        }
+        .btn-download-pdf:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-download-pdf .pdf-icon {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+        .btn-download-pdf .spinner-small {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        .btn-download-pdf.loading .spinner-small {
+            display: block;
+        }
+        .btn-download-pdf.loading .pdf-icon {
+            display: none;
+        }
+
+        /* ── Score Panel ─────────────────────────── */
+        .score-panel {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            animation: fadeIn 0.6s ease;
+        }
+        .score-gauge {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            flex-shrink: 0;
+        }
+        .score-gauge svg {
+            width: 140px;
+            height: 140px;
+            transform: rotate(-90deg);
+        }
+        .score-gauge .track {
+            fill: none;
+            stroke: var(--border-card);
+            stroke-width: 10;
+        }
+        .score-gauge .fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 408;
+            stroke-dashoffset: 408;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease;
+        }
+        .score-gauge .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .score-gauge .score-number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .score-gauge .score-max {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .score-info {
+            flex: 1;
+        }
+        .score-label {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .score-sublabel {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* Category breakdown grid */
+        .score-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+        }
+        .score-cat {
+            background: var(--bg-field);
+            border: 1px solid var(--border-field);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .score-cat:hover {
+            border-color: #2a3a52;
+        }
+        .score-cat-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+        .score-cat-value {
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* Deductions detail */
+        .score-deductions {
+            margin-top: 16px;
+        }
+        .score-deductions-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .score-deductions-title:hover {
+            color: var(--text-secondary);
+        }
+        .score-deductions-list {
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .score-deductions-list.open {
+            display: flex;
+        }
+        .deduction-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--badge-error-bg);
+            color: var(--badge-error-text);
+        }
+        .deduction-tag.minor {
+            background: var(--badge-warn-bg);
+            color: var(--badge-warn-text);
+        }
+
         /* ── Responsive ──────────────────────────── */
         @media (max-width: 768px) {
             .container { padding: 0 12px 40px; }
@@ -347,9 +559,12 @@
             .stat-grid { grid-template-columns: repeat(2, 1fr); }
             .search-bar { flex-direction: column; }
             .search-bar button { width: 100%; }
+            .score-panel { flex-direction: column; text-align: center; gap: 20px; padding: 24px 18px; }
+            .score-categories { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 480px) {
             .stat-grid { grid-template-columns: 1fr 1fr; }
+            .score-categories { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -380,8 +595,44 @@
             <p>Rastreando tags e metadados...</p>
         </div>
 
+        <!-- PDF Download Button -->
+        <div id="pdfActions" class="pdf-actions">
+            <button class="btn-download-pdf" id="btnDownloadPdf" onclick="generatePDF()">
+                <span class="pdf-icon">📄</span>
+                <div class="spinner-small"></div>
+                Baixar Relatório PDF
+            </button>
+        </div>
+
         <!-- Results -->
         <div id="results" class="results">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 0. Score Panel                             -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div id="scorePanel" class="score-panel">
+                <div class="score-gauge">
+                    <svg viewBox="0 0 140 140">
+                        <circle class="track" cx="70" cy="70" r="65"></circle>
+                        <circle id="scoreCircle" class="fill" cx="70" cy="70" r="65"></circle>
+                    </svg>
+                    <div class="score-text">
+                        <div id="scoreNumber" class="score-number" style="color: var(--text-muted)">—</div>
+                        <div class="score-max">/ 100</div>
+                    </div>
+                </div>
+                <div class="score-info">
+                    <div id="scoreLabel" class="score-label">Calculando...</div>
+                    <div id="scoreSublabel" class="score-sublabel">Avaliando critérios de SEO...</div>
+                    <div class="score-categories" id="scoreCategories"></div>
+                    <div class="score-deductions">
+                        <div class="score-deductions-title" onclick="this.nextElementSibling.classList.toggle('open')">
+                            🔎 Ver penalidades detalhadas <span style="font-size:0.6rem">▼</span>
+                        </div>
+                        <div id="scoreDeductions" class="score-deductions-list"></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- 1. SEO Básico                              -->
@@ -800,6 +1051,10 @@
         </div><!-- /results -->
     </div><!-- /container -->
 
+    <!-- jsPDF + html2canvas CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
     <script>
         // ── Helpers ─────────────────────────────────────────
         function setBadge(id, found, customLabel) {
@@ -821,6 +1076,226 @@
 
         function isPresent(val) {
             return val && val !== 'N/A' && val !== 'Não encontrado' && val !== 'Não encontrada' && val !== 'Não definido';
+        }
+
+        // ── SEO Score Calculator ────────────────────────────
+        function calculateScore(data) {
+            let score = 100;
+            const deductions = [];
+            const categories = {};
+
+            // Helper
+            const deduct = (cat, points, reason) => {
+                score -= points;
+                deductions.push({ cat, points, reason });
+                if (!categories[cat]) categories[cat] = { max: 0, lost: 0 };
+                categories[cat].lost += points;
+            };
+
+            // Define max points per category (for display)
+            const catWeights = {
+                'SEO Básico':       30,
+                'Open Graph':       12,
+                'Twitter Cards':     5,
+                'Headings':         13,
+                'Imagens':           5,
+                'Links':             5,
+                'Técnico':          15,
+                'Schema':            7,
+                'Google News':       8
+            };
+            Object.keys(catWeights).forEach(c => categories[c] = { max: catWeights[c], lost: 0 });
+
+            // ── 1. SEO Básico (30 pts) ────────────────────────
+            if (!isPresent(data.basic.title)) {
+                deduct('SEO Básico', 12, 'Título ausente');
+            } else {
+                const tLen = data.basic.titleLength;
+                if (tLen < 30)      deduct('SEO Básico', 5, 'Título muito curto (<30 chars)');
+                else if (tLen > 60) deduct('SEO Básico', 3, 'Título muito longo (>60 chars)');
+            }
+
+            if (!isPresent(data.basic.description)) {
+                deduct('SEO Básico', 10, 'Meta description ausente');
+            } else {
+                const dLen = data.basic.descLength;
+                if (dLen < 120)      deduct('SEO Básico', 4, 'Description curta (<120 chars)');
+                else if (dLen > 160) deduct('SEO Básico', 2, 'Description longa (>160 chars)');
+            }
+
+            if (!isPresent(data.basic.canonical)) {
+                deduct('SEO Básico', 6, 'URL canônica ausente');
+            }
+
+            if (isPresent(data.basic.metaRobots) && data.basic.metaRobots.includes('noindex')) {
+                deduct('SEO Básico', 8, 'Meta robots com noindex');
+            }
+
+            if (data.basic.wordCount < 300 && data.basic.wordCount > 0) {
+                deduct('SEO Básico', 3, 'Pouco conteúdo (<300 palavras)');
+            } else if (data.basic.wordCount === 0) {
+                deduct('SEO Básico', 5, 'Sem conteúdo textual');
+            }
+
+            // ── 2. Open Graph (12 pts) ────────────────────────
+            if (!isPresent(data.openGraph.ogTitle))       deduct('Open Graph', 3, 'OG:Title ausente');
+            if (!isPresent(data.openGraph.ogDescription)) deduct('Open Graph', 3, 'OG:Description ausente');
+            if (!isPresent(data.openGraph.ogImage))       deduct('Open Graph', 4, 'OG:Image ausente');
+            if (!isPresent(data.openGraph.ogUrl))         deduct('Open Graph', 1, 'OG:URL ausente');
+            if (!isPresent(data.openGraph.ogType))        deduct('Open Graph', 0.5, 'OG:Type ausente');
+            if (!isPresent(data.openGraph.ogSiteName))    deduct('Open Graph', 0.5, 'OG:Site Name ausente');
+
+            // ── 3. Twitter Cards (5 pts) ──────────────────────
+            if (!isPresent(data.twitter.twitterCard))        deduct('Twitter Cards', 2, 'Twitter Card ausente');
+            if (!isPresent(data.twitter.twitterTitle))       deduct('Twitter Cards', 1.5, 'Twitter Title ausente');
+            if (!isPresent(data.twitter.twitterDescription)) deduct('Twitter Cards', 1.5, 'Twitter Description ausente');
+
+            // ── 4. Headings (13 pts) ─────────────────────────
+            if (data.structure.h1 === 0) {
+                deduct('Headings', 8, 'H1 ausente');
+            } else if (data.structure.h1 > 1) {
+                deduct('Headings', 4, 'Múltiplos H1 (' + data.structure.h1 + ')');
+            }
+            if (data.structure.h2 === 0) {
+                deduct('Headings', 3, 'Nenhum H2');
+            }
+            if (!data.structure.hierarchyOk) {
+                deduct('Headings', 4, 'Hierarquia de headings quebrada');
+            }
+
+            // ── 5. Imagens (5 pts) ───────────────────────────
+            if (data.images.total > 0 && data.images.withoutAlt > 0) {
+                const ratio = data.images.withoutAlt / data.images.total;
+                const penalty = Math.min(5, Math.round(ratio * 5 * 10) / 10);
+                deduct('Imagens', penalty, data.images.withoutAlt + ' imagens sem ALT');
+            }
+
+            // ── 6. Links (5 pts) ─────────────────────────────
+            if (data.links.internal === 0 && data.links.total > 0) {
+                deduct('Links', 3, 'Nenhum link interno');
+            }
+            if (data.links.external === 0 && data.links.total > 0) {
+                deduct('Links', 2, 'Nenhum link externo');
+            }
+
+            // ── 7. Técnico (15 pts) ──────────────────────────
+            if (!isPresent(data.technical.viewport)) {
+                deduct('Técnico', 8, 'Meta viewport ausente');
+            }
+            if (!isPresent(data.technical.favicon)) {
+                deduct('Técnico', 3, 'Favicon ausente');
+            }
+            if (!isPresent(data.technical.charset)) {
+                deduct('Técnico', 2, 'Charset não declarado');
+            }
+            if (!isPresent(data.technical.publishedTime)) {
+                deduct('Técnico', 2, 'Data de publicação ausente');
+            }
+
+            // ── 8. Schema (7 pts) ────────────────────────────
+            if (!data.schema.detected) {
+                deduct('Schema', 7, 'Nenhum dado estruturado (JSON-LD)');
+            } else if (!data.schema.types || data.schema.types.length === 0) {
+                deduct('Schema', 3, 'Schema sem tipos definidos');
+            }
+
+            // ── 9. Google News (8 pts) ───────────────────────
+            if (data.googleNews) {
+                const gn = data.googleNews;
+                if (!gn.dateModified)   deduct('Google News', 2, 'dateModified ausente');
+                if (!gn.schemaHeadline) deduct('Google News', 2, 'Headline ausente no schema');
+                if (gn.schemaHeadlineLength > 110) deduct('Google News', 1, 'Headline >110 caracteres');
+                if (gn.metaRefresh)     deduct('Google News', 3, 'Meta refresh detectado');
+                if (gn.titleH1Similarity === 'mismatch')  deduct('Google News', 1, 'Title e H1 divergentes');
+                if (gn.titleH1Similarity === 'no_h1')     deduct('Google News', 1, 'Sem H1 para comparar com title');
+            }
+
+            // Clamp score
+            score = Math.max(0, Math.round(score));
+
+            return { score, deductions, categories };
+        }
+
+        // ── Render Score UI ─────────────────────────────────
+        function renderScore(scoreData) {
+            const { score, deductions, categories } = scoreData;
+
+            // Color based on score
+            let color, label, sublabel;
+            if (score >= 85) {
+                color = '#10b981'; label = 'Excelente';
+                sublabel = 'Esta página está muito bem otimizada para mecanismos de busca.';
+            } else if (score >= 70) {
+                color = '#3b82f6'; label = 'Bom';
+                sublabel = 'A página tem boa otimização, mas há espaço para melhorias.';
+            } else if (score >= 50) {
+                color = '#f59e0b'; label = 'Médio';
+                sublabel = 'Diversos itens de SEO precisam de atenção para melhorar o desempenho.';
+            } else {
+                color = '#ef4444'; label = 'Fraco';
+                sublabel = 'A página tem problemas críticos de SEO que impactam a visibilidade.';
+            }
+
+            // Animate gauge
+            const circle = document.getElementById('scoreCircle');
+            const circumference = 2 * Math.PI * 65; // r = 65
+            const offset = circumference - (score / 100) * circumference;
+            circle.style.stroke = color;
+            circle.style.strokeDasharray = circumference;
+            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
+
+            // Score number with count-up animation
+            const scoreEl = document.getElementById('scoreNumber');
+            scoreEl.style.color = color;
+            let current = 0;
+            const duration = 1200;
+            const step = Math.max(1, Math.ceil(score / (duration / 20)));
+            const counter = setInterval(() => {
+                current += step;
+                if (current >= score) { current = score; clearInterval(counter); }
+                scoreEl.textContent = current;
+            }, 20);
+
+            // Label
+            document.getElementById('scoreLabel').textContent = label;
+            document.getElementById('scoreLabel').style.color = color;
+            document.getElementById('scoreSublabel').textContent = sublabel;
+
+            // Categories breakdown
+            const catContainer = document.getElementById('scoreCategories');
+            catContainer.innerHTML = '';
+            Object.entries(categories).forEach(([name, { max, lost }]) => {
+                const earned = Math.max(0, Math.round((max - lost) * 10) / 10);
+                let catColor = 'var(--accent-green)';
+                const pct = earned / max;
+                if (pct < 0.5) catColor = 'var(--accent-red)';
+                else if (pct < 0.8) catColor = 'var(--accent-amber)';
+                else if (pct < 1) catColor = 'var(--accent-blue)';
+
+                const div = document.createElement('div');
+                div.className = 'score-cat';
+                div.innerHTML = `
+                    <span class="score-cat-name">${name}</span>
+                    <span class="score-cat-value" style="color:${catColor}">${earned}/${max}</span>
+                `;
+                catContainer.appendChild(div);
+            });
+
+            // Deductions list
+            const dedContainer = document.getElementById('scoreDeductions');
+            dedContainer.innerHTML = '';
+            if (deductions.length === 0) {
+                dedContainer.innerHTML = '<span style="font-size:0.75rem;color:var(--accent-green)">✓ Nenhuma penalidade — Parabéns!</span>';
+                dedContainer.classList.add('open');
+            } else {
+                deductions.sort((a, b) => b.points - a.points);
+                deductions.forEach(d => {
+                    const tag = document.createElement('span');
+                    tag.className = 'deduction-tag' + (d.points <= 2 ? ' minor' : '');
+                    tag.textContent = `−${d.points} ${d.reason}`;
+                    dedContainer.appendChild(tag);
+                });
+            }
         }
 
         // ── Title length badge logic ────────────────────────
@@ -1199,11 +1674,127 @@
                     }
                 }
 
+                // ── Calculate and render SEO Score ──────────
+                const scoreData = calculateScore(data);
+                renderScore(scoreData);
+
                 resultsDiv.classList.add('active');
+                document.getElementById('pdfActions').classList.add('active');
             } catch (err) {
                 alert('Erro ao analisar: ' + err.message);
             } finally {
                 loading.classList.remove('active');
+            }
+        }
+
+        // ── Generate PDF ────────────────────────────────────
+        async function generatePDF() {
+            const btn = document.getElementById('btnDownloadPdf');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const resultsEl = document.getElementById('results');
+
+                // Capture the results section
+                const canvas = await html2canvas(resultsEl, {
+                    backgroundColor: '#0a0e1a',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    windowWidth: 1100
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+
+                // A4 dimensions in mm
+                const pdfWidth = 210;
+                const pdfHeight = 297;
+                const margin = 12;
+                const contentWidth = pdfWidth - margin * 2;
+                const contentHeight = (imgHeight * contentWidth) / imgWidth;
+
+                const pdf = new jsPDF('p', 'mm', 'a4');
+
+                // Add header on first page
+                pdf.setFillColor(10, 14, 26);
+                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.setTextColor(232, 236, 244);
+                pdf.text('Analisador SEO — Relatório', margin, 18);
+
+                const urlText = document.getElementById('urlInput').value.trim();
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.setTextColor(132, 146, 166);
+                pdf.text(`URL: ${urlText}`, margin, 25);
+                pdf.text(`Data: ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, margin, 30);
+
+                // Separator line
+                pdf.setDrawColor(30, 42, 58);
+                pdf.setLineWidth(0.3);
+                pdf.line(margin, 34, pdfWidth - margin, 34);
+
+                const headerOffset = 38;
+                const availableHeight = pdfHeight - headerOffset - margin;
+
+                if (contentHeight <= availableHeight) {
+                    // Fits in one page
+                    pdf.addImage(imgData, 'PNG', margin, headerOffset, contentWidth, contentHeight);
+                } else {
+                    // Multiple pages
+                    let yOffset = 0;
+                    let isFirstPage = true;
+
+                    while (yOffset < contentHeight) {
+                        if (!isFirstPage) {
+                            pdf.addPage();
+                            pdf.setFillColor(10, 14, 26);
+                            pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                        }
+
+                        const startY = isFirstPage ? headerOffset : margin;
+                        const pageAvail = isFirstPage ? availableHeight : (pdfHeight - margin * 2);
+
+                        // Clip and draw portion of the image
+                        const sourceY = (yOffset / contentHeight) * imgHeight;
+                        const sourceH = (pageAvail / contentHeight) * imgHeight;
+
+                        // Create a temporary canvas to slice
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = imgWidth;
+                        tempCanvas.height = Math.min(sourceH, imgHeight - sourceY);
+                        const ctx = tempCanvas.getContext('2d');
+                        ctx.drawImage(canvas, 0, sourceY, imgWidth, tempCanvas.height, 0, 0, imgWidth, tempCanvas.height);
+
+                        const sliceData = tempCanvas.toDataURL('image/png');
+                        const sliceH = (tempCanvas.height * contentWidth) / imgWidth;
+                        pdf.addImage(sliceData, 'PNG', margin, startY, contentWidth, sliceH);
+
+                        yOffset += pageAvail;
+                        isFirstPage = false;
+                    }
+                }
+
+                // Footer on last page
+                pdf.setFontSize(7);
+                pdf.setTextColor(90, 101, 119);
+                pdf.text('Gerado por Analisador SEO Pro — Web Journalism Tool', margin, pdfHeight - 8);
+
+                // Download
+                const domain = new URL(urlText).hostname.replace('www.', '');
+                pdf.save(`seo-report-${domain}.pdf`);
+
+            } catch (err) {
+                console.error('PDF generation error:', err);
+                alert('Erro ao gerar PDF: ' + err.message);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
             }
         }
 
