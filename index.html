@@ -4,165 +4,1032 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analisador SEO Pro — Web Journalism Tool</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; } /* Slate 900 */
-        .card { background-color: #1e293b; border: 1px solid #334155; }
-        .badge-ok { background-color: #065f46; color: #34d399; font-size: 10px; padding: 2px 8px; border-radius: 4px; }
-        .badge-warn { background-color: #78350f; color: #fbbf24; font-size: 10px; padding: 2px 8px; border-radius: 4px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-body: #0a0e1a;
+            --bg-card: #111827;
+            --bg-card-hover: #151d2e;
+            --bg-field: #0d1321;
+            --border-card: #1e2a3a;
+            --border-field: #1a2336;
+            --text-primary: #e8ecf4;
+            --text-secondary: #8492a6;
+            --text-muted: #5a6577;
+            --text-label: #6b7a8d;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --badge-ok-bg: #064e3b;
+            --badge-ok-text: #34d399;
+            --badge-warn-bg: #78350f;
+            --badge-warn-text: #fbbf24;
+            --badge-error-bg: #7f1d1d;
+            --badge-error-text: #f87171;
+            --badge-info-bg: #1e3a5f;
+            --badge-info-text: #60a5fa;
+            --badge-neutral-bg: #1f2937;
+            --badge-neutral-text: #9ca3af;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* ── Top Bar ─────────────────────────────── */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            padding: 12px 24px;
+        }
+        .lang-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover, .lang-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
+        /* ── Container ───────────────────────────── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        /* ── Header ──────────────────────────────── */
+        .header {
+            text-align: center;
+            padding: 30px 0 40px;
+        }
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            max-width: 550px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── Search Bar ──────────────────────────── */
+        .search-bar {
+            display: flex;
+            gap: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+        .search-bar:focus-within {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            padding: 14px 16px;
+            outline: none;
+            font-family: inherit;
+        }
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+        .search-bar button {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .search-bar button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .search-bar button:active {
+            transform: scale(0.97);
+        }
+
+        /* ── Analysis URL text ───────────────────── */
+        .analysis-url {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        .analysis-url a {
+            color: var(--accent-blue);
+            text-decoration: underline;
+        }
+
+        /* ── Loading ─────────────────────────────── */
+        .loading {
+            text-align: center;
+            padding: 60px 0;
+            display: none;
+        }
+        .loading.active { display: block; }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border-card);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p {
+            color: var(--accent-blue);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* ── Results ─────────────────────────────── */
+        .results {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .results.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Section ─────────────────────────────── */
+        .section {
+            margin-bottom: 28px;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-card);
+        }
+        .section-title .icon {
+            font-size: 0.85rem;
+        }
+
+        /* ── Field Cards Grid ────────────────────── */
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .field-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 16px 18px;
+            transition: all 0.2s;
+        }
+        .field-card:hover {
+            border-color: #2a3a52;
+            background: var(--bg-card-hover);
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .field-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-label);
+        }
+
+        .field-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+        .field-value.mono {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+        .field-value.large {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        .field-value.truncate {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ── Badges ──────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .badge-ok { background: var(--badge-ok-bg); color: var(--badge-ok-text); }
+        .badge-warn { background: var(--badge-warn-bg); color: var(--badge-warn-text); }
+        .badge-error { background: var(--badge-error-bg); color: var(--badge-error-text); }
+        .badge-info { background: var(--badge-info-bg); color: var(--badge-info-text); }
+        .badge-neutral { background: var(--badge-neutral-bg); color: var(--badge-neutral-text); }
+        .badge-title-ok { background: #064e3b; color: #34d399; }
+        .badge-title-short { background: #78350f; color: #fbbf24; }
+        .badge-title-long { background: #7f1d1d; color: #f87171; }
+
+        /* ── Stat Cards (compact numbers) ────────── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 16px 18px;
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            border-color: #2a3a52;
+            background: var(--bg-card-hover);
+        }
+
+        /* ── OG Image Preview ────────────────────── */
+        .og-image-preview {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid var(--border-card);
+        }
+
+        /* ── Schema Types List ───────────────────── */
+        .schema-types-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .schema-type-tag {
+            background: var(--bg-field);
+            border: 1px solid var(--border-card);
+            color: var(--accent-cyan);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* ── Hierarchy indicator ─────────────────── */
+        .hierarchy-value {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        /* ── Responsive ──────────────────────────── */
+        @media (max-width: 768px) {
+            .container { padding: 0 12px 40px; }
+            .header h1 { font-size: 1.6rem; }
+            .fields-grid { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .search-bar { flex-direction: column; }
+            .search-bar button { width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen p-4 md:p-10 font-sans">
+<body>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-extrabold text-white mb-2">Analisador SEO</h1>
-            <p class="text-slate-400">Analise a estrutura técnica e editorial da sua página em segundos.</p>
-        </header>
-
-        <div class="flex flex-col md:flex-row gap-3 mb-10">
-            <input type="text" id="urlInput" placeholder="https://exemplo.com.br" 
-                   class="flex-1 p-4 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white shadow-lg">
-            <button onclick="analisar()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-lg transition-all shadow-lg active:scale-95">
-                Analisar Link
-            </button>
-        </div>
-
-        <div id="loading" class="hidden text-center py-10">
-            <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
-            <p class="text-blue-400 font-medium">Rastreando tags e metadados...</p>
-        </div>
-
-        <div id="results" class="hidden animate-in fade-in duration-500">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <div class="card p-6 rounded-xl">
-                    <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">🔍 SEO Básico</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs text-slate-400 uppercase font-bold">Título da Página</span>
-                                <span id="badge-title" class="badge-ok">Encontrado</span>
-                            </div>
-                            <p id="res-title" class="text-sm font-semibold text-white"></p>
-                            <p id="res-title-len" class="text-[10px] text-slate-500 mt-1"></p>
-                        </div>
-                        <hr class="border-slate-700">
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs text-slate-400 uppercase font-bold">Meta Description</span>
-                                <span id="badge-desc" class="badge-ok">Encontrado</span>
-                            </div>
-                            <p id="res-desc" class="text-sm text-slate-300 leading-relaxed"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-6 rounded-xl">
-                    <h3 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">📊 Estrutura (H-Tags)</h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="text-center bg-slate-900/50 p-4 rounded-lg">
-                            <span class="block text-2xl font-bold text-white" id="res-h1">0</span>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase">H1 Tags</span>
-                        </div>
-                        <div class="text-center bg-slate-900/50 p-4 rounded-lg">
-                            <span class="block text-2xl font-bold text-white" id="res-h2">0</span>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase">H2 Tags</span>
-                        </div>
-                        <div class="text-center bg-slate-900/50 p-4 rounded-lg">
-                            <span class="block text-2xl font-bold text-white" id="res-h3">0</span>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase">H3 Tags</span>
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <p class="text-xs text-slate-400 font-bold uppercase mb-2">Imagens</p>
-                        <div class="flex justify-between text-sm border-t border-slate-700 pt-2">
-                            <span>Total de Imagens:</span>
-                            <span id="res-img-total" class="font-bold text-white">0</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-2">
-                            <span>Sem atributo ALT:</span>
-                            <span id="res-img-alt" class="font-bold text-amber-400">0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-6 rounded-xl">
-                    <h3 class="text-xs font-bold text-green-400 uppercase tracking-widest mb-4">🌐 Social & Técnico</h3>
-                    <div class="space-y-4 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Open Graph (OG):</span>
-                            <span id="res-og" class="badge-ok">Detectado</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Links Internos:</span>
-                            <span id="res-links-int" class="font-bold">0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Links Externos:</span>
-                            <span id="res-links-ext" class="font-bold">0</span>
-                        </div>
-                        <hr class="border-slate-700">
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Dados Estruturados:</span>
-                            <span id="res-schema" class="text-blue-400 font-bold uppercase text-[10px]">Pendente</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+    <div class="top-bar">
+        <button class="lang-btn active" onclick="setLang('pt')">PT</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
     </div>
 
+    <div class="container">
+        <header class="header">
+            <h1>Analisador SEO</h1>
+            <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
+        </header>
+
+        <div class="search-bar">
+            <input type="text" id="urlInput" placeholder="https://exemplo.com.br/pagina" 
+                   onkeydown="if(event.key==='Enter')analisar()">
+            <button onclick="analisar()">Analisar Link</button>
+        </div>
+
+        <div id="analysisUrl" class="analysis-url" style="display:none;"></div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Rastreando tags e metadados...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 1. SEO Básico                              -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">🔍</span> SEO Básico</div>
+                <div class="fields-grid">
+                    <!-- Título da Página -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Título da Página</span>
+                            <span id="badge-title" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-title" class="field-value"></div>
+                    </div>
+                    <!-- Tamanho do Título -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Tamanho do Título</span>
+                            <span id="badge-title-len" class="badge badge-ok">50-60 chars · Ideal</span>
+                        </div>
+                        <div id="res-title-len" class="field-value"></div>
+                    </div>
+                    <!-- Meta Description -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Meta Description</span>
+                            <span id="badge-desc" class="badge badge-ok">Encontrada</span>
+                        </div>
+                        <div id="res-desc" class="field-value truncate"></div>
+                    </div>
+                    <!-- Caracteres da Descrição -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Caracteres da Descrição</span>
+                            <span id="badge-desc-len" class="badge badge-ok">Adequado</span>
+                        </div>
+                        <div id="res-desc-len" class="field-value"></div>
+                    </div>
+                    <!-- URL Canônica -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">URL Canônica</span>
+                            <span id="badge-canonical" class="badge badge-ok">Encontrada</span>
+                        </div>
+                        <div id="res-canonical" class="field-value mono truncate"></div>
+                    </div>
+                    <!-- Meta Robots -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Meta Robots</span>
+                            <span id="badge-robots" class="badge badge-info">Informativo</span>
+                        </div>
+                        <div id="res-robots" class="field-value"></div>
+                    </div>
+                    <!-- Contagem de palavras -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Palavras no Artigo</span>
+                            <span id="badge-words" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-words" class="field-value"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 2. Open Graph (Social)                     -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">🌐</span> Open Graph (Social)</div>
+                <div class="fields-grid">
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:Title</span>
+                            <span id="badge-og-title" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-title" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:Description</span>
+                            <span id="badge-og-desc" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-desc" class="field-value truncate"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:Image</span>
+                            <span id="badge-og-image" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-image" class="field-value mono truncate"></div>
+                        <img id="res-og-image-preview" class="og-image-preview" style="display:none;" alt="OG Image Preview">
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:URL</span>
+                            <span id="badge-og-url" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-url" class="field-value mono truncate"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:Type</span>
+                            <span id="badge-og-type" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-type" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">OG:Site Name</span>
+                            <span id="badge-og-sitename" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-og-sitename" class="field-value"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 3. Twitter Cards                           -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">🐦</span> Twitter Cards</div>
+                <div class="fields-grid">
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Twitter Card</span>
+                            <span id="badge-tw-card" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-tw-card" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Twitter Title</span>
+                            <span id="badge-tw-title" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-tw-title" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Twitter Description</span>
+                            <span id="badge-tw-desc" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-tw-desc" class="field-value truncate"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 4. Conteúdo e Headings                     -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">📊</span> Conteúdo e Headings</div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">H1</span>
+                            <span id="badge-h1" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-h1" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">H2</span>
+                            <span id="badge-h2" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-h2" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">H3+H4</span>
+                            <span id="badge-h3" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-h3" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Tags H4+</span>
+                            <span id="badge-h4" class="badge badge-neutral">Info</span>
+                        </div>
+                        <div id="res-h4plus" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Hierarquia de Títulos</span>
+                            <span id="badge-hierarchy" class="badge badge-ok">Boa</span>
+                        </div>
+                        <div id="res-hierarchy" class="hierarchy-value">H1 → H2 → H3+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 5. Imagens                                 -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">🖼️</span> Imagens</div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Total de Imagens</span>
+                            <span id="badge-img-total" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-img-total" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Imagens com ALT</span>
+                            <span id="badge-img-alt-ok" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-img-alt-ok" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Imagens sem ALT</span>
+                            <span id="badge-img-alt-missing" class="badge badge-warn">Atenção</span>
+                        </div>
+                        <div id="res-img-alt-missing" class="field-value large">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 6. Links                                   -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">🔗</span> Links</div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Total de Links</span>
+                            <span id="badge-links-total" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-links-total" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Links Internos</span>
+                            <span id="badge-links-int" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-links-int" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Links Externos</span>
+                            <span id="badge-links-ext" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-links-ext" class="field-value large">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="field-header">
+                            <span class="field-label">Links Nofollow</span>
+                            <span id="badge-links-nf" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-links-nf" class="field-value large">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 7. Técnico                                 -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">⚙️</span> Técnico</div>
+                <div class="fields-grid">
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Meta Viewport</span>
+                            <span id="badge-viewport" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-viewport" class="field-value mono"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Favicon</span>
+                            <span id="badge-favicon" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-favicon" class="field-value mono truncate"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Declaração de Charset</span>
+                            <span id="badge-charset" class="badge badge-info">UTF-8</span>
+                        </div>
+                        <div id="res-charset" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Tag Hreflang</span>
+                            <span id="badge-hreflang" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-hreflang" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Meta Author</span>
+                            <span id="badge-author" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-author" class="field-value"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Index Keywords</span>
+                            <span id="badge-keywords" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-keywords" class="field-value truncate"></div>
+                    </div>
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Data de Publicação</span>
+                            <span id="badge-published" class="badge badge-ok">OK</span>
+                        </div>
+                        <div id="res-published" class="field-value"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 8. Dados Estruturados                       -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">📋</span> Dados Estruturados</div>
+                <div class="fields-grid">
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Dados Estruturados</span>
+                            <span id="badge-schema" class="badge badge-ok">Encontrado</span>
+                        </div>
+                        <div id="res-schema" class="field-value"></div>
+                    </div>
+                </div>
+                <div class="fields-grid" style="margin-top: 10px;">
+                    <div class="field-card" style="grid-column: 1 / -1;">
+                        <div class="field-header">
+                            <span class="field-label">Tipos de Schema Encontrados</span>
+                            <span id="badge-schema-types" class="badge badge-info">Encontrado</span>
+                        </div>
+                        <div id="res-schema-types" class="schema-types-list"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /results -->
+    </div><!-- /container -->
+
     <script>
+        // ── Helpers ─────────────────────────────────────────
+        function setBadge(id, found, customLabel) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (found) {
+                el.className = 'badge badge-ok';
+                el.textContent = customLabel || 'Encontrado';
+            } else {
+                el.className = 'badge badge-warn';
+                el.textContent = 'Ausente';
+            }
+        }
+
+        function setField(id, value, fallback = '—') {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value || fallback;
+        }
+
+        function isPresent(val) {
+            return val && val !== 'N/A' && val !== 'Não encontrado' && val !== 'Não encontrada' && val !== 'Não definido';
+        }
+
+        // ── Title length badge logic ────────────────────────
+        function titleLenBadge(len) {
+            const el = document.getElementById('badge-title-len');
+            if (len === 0) {
+                el.className = 'badge badge-error';
+                el.textContent = 'Sem título';
+            } else if (len < 30) {
+                el.className = 'badge badge-warn';
+                el.textContent = 'Muito curto';
+            } else if (len <= 60) {
+                el.className = 'badge badge-ok';
+                el.textContent = '50-60 chars · Ideal';
+            } else {
+                el.className = 'badge badge-warn';
+                el.textContent = 'Muito longo';
+            }
+        }
+
+        // ── Desc length badge logic ─────────────────────────
+        function descLenBadge(len) {
+            const el = document.getElementById('badge-desc-len');
+            if (len === 0) {
+                el.className = 'badge badge-error';
+                el.textContent = 'Ausente';
+            } else if (len < 120) {
+                el.className = 'badge badge-warn';
+                el.textContent = 'Curta';
+            } else if (len <= 160) {
+                el.className = 'badge badge-ok';
+                el.textContent = 'Adequado';
+            } else {
+                el.className = 'badge badge-warn';
+                el.textContent = 'Longa';
+            }
+        }
+
+        // ── Main Analysis Function ──────────────────────────
         async function analisar() {
             const urlInput = document.getElementById('urlInput');
-            const url = urlInput.value;
+            const url = urlInput.value.trim();
             if (!url) return alert('Por favor, insira uma URL válida.');
 
             const loading = document.getElementById('loading');
             const resultsDiv = document.getElementById('results');
-            
-            loading.classList.remove('hidden');
-            resultsDiv.classList.add('hidden');
+            const analysisUrl = document.getElementById('analysisUrl');
+
+            loading.classList.add('active');
+            resultsDiv.classList.remove('active');
+            analysisUrl.style.display = 'none';
 
             try {
-                // Chama a API que você criou na Vercel
                 const response = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
 
                 if (data.error) throw new Error(data.error);
 
-                // Preencher SEO Básico
-                document.getElementById('res-title').innerText = data.basic.title;
-                document.getElementById('res-title-len').innerText = `${data.basic.titleLength} caracteres (Ideal: 50-60)`;
-                document.getElementById('res-desc').innerText = data.basic.description;
-                
-                // Badges dinâmicos
-                document.getElementById('badge-title').className = data.basic.titleLength > 0 ? 'badge-ok' : 'badge-warn';
-                document.getElementById('badge-desc').className = data.basic.descLength > 0 ? 'badge-ok' : 'badge-warn';
+                // Show analyzed URL
+                analysisUrl.innerHTML = `Resultados da Análise de SEO para <a href="${data.analyzedUrl}" target="_blank" rel="noopener">${data.analyzedUrl}</a>`;
+                analysisUrl.style.display = 'block';
 
-                // Preencher Estrutura
-                document.getElementById('res-h1').innerText = data.structure.h1;
-                document.getElementById('res-h2').innerText = data.structure.h2;
-                document.getElementById('res-h3').innerText = data.structure.h3;
-                document.getElementById('res-img-total').innerText = data.structure.images;
-                document.getElementById('res-img-alt').innerText = data.structure.imagesAltMissing;
+                // ── 1. SEO Básico ───────────────────────────
+                setField('res-title', data.basic.title);
+                setBadge('badge-title', isPresent(data.basic.title));
 
-                // Preencher Social e Links
-                document.getElementById('res-og').innerText = data.social.ogTitle !== 'N/A' ? 'Encontrado' : 'Ausente';
-                document.getElementById('res-og').className = data.social.ogTitle !== 'N/A' ? 'badge-ok' : 'badge-warn';
-                document.getElementById('res-links-int').innerText = data.links.internal;
-                document.getElementById('res-links-ext').innerText = data.links.external;
-                document.getElementById('res-schema').innerText = data.schema;
+                setField('res-title-len', `${data.basic.titleLength} caracteres`);
+                titleLenBadge(data.basic.titleLength);
 
-                resultsDiv.classList.remove('hidden');
+                setField('res-desc', data.basic.description);
+                setBadge('badge-desc', isPresent(data.basic.description), 'Encontrada');
+
+                setField('res-desc-len', `${data.basic.descLength} caracteres`);
+                descLenBadge(data.basic.descLength);
+
+                setField('res-canonical', data.basic.canonical);
+                setBadge('badge-canonical', isPresent(data.basic.canonical), 'Encontrada');
+
+                setField('res-robots', data.basic.metaRobots);
+                const robotsEl = document.getElementById('badge-robots');
+                if (isPresent(data.basic.metaRobots)) {
+                    robotsEl.className = 'badge badge-info';
+                    robotsEl.textContent = data.basic.metaRobots.includes('noindex') ? 'Noindex' : 'Informativo';
+                } else {
+                    robotsEl.className = 'badge badge-neutral';
+                    robotsEl.textContent = 'Ausente';
+                }
+
+                setField('res-words', `${data.basic.wordCount.toLocaleString('pt-BR')} palavras`);
+                const wordsEl = document.getElementById('badge-words');
+                if (data.basic.wordCount > 300) {
+                    wordsEl.className = 'badge badge-ok';
+                    wordsEl.textContent = 'Bom';
+                } else if (data.basic.wordCount > 0) {
+                    wordsEl.className = 'badge badge-warn';
+                    wordsEl.textContent = 'Pouco conteúdo';
+                } else {
+                    wordsEl.className = 'badge badge-error';
+                    wordsEl.textContent = 'Sem conteúdo';
+                }
+
+                // ── 2. Open Graph ───────────────────────────
+                setField('res-og-title', data.openGraph.ogTitle);
+                setBadge('badge-og-title', isPresent(data.openGraph.ogTitle));
+
+                setField('res-og-desc', data.openGraph.ogDescription);
+                setBadge('badge-og-desc', isPresent(data.openGraph.ogDescription));
+
+                setField('res-og-image', data.openGraph.ogImage);
+                setBadge('badge-og-image', isPresent(data.openGraph.ogImage));
+                const ogImgPreview = document.getElementById('res-og-image-preview');
+                if (isPresent(data.openGraph.ogImage)) {
+                    ogImgPreview.src = data.openGraph.ogImage;
+                    ogImgPreview.style.display = 'block';
+                    ogImgPreview.onerror = () => { ogImgPreview.style.display = 'none'; };
+                } else {
+                    ogImgPreview.style.display = 'none';
+                }
+
+                setField('res-og-url', data.openGraph.ogUrl);
+                setBadge('badge-og-url', isPresent(data.openGraph.ogUrl));
+
+                setField('res-og-type', data.openGraph.ogType);
+                setBadge('badge-og-type', isPresent(data.openGraph.ogType));
+
+                setField('res-og-sitename', data.openGraph.ogSiteName);
+                setBadge('badge-og-sitename', isPresent(data.openGraph.ogSiteName));
+
+                // ── 3. Twitter Cards ────────────────────────
+                setField('res-tw-card', data.twitter.twitterCard);
+                setBadge('badge-tw-card', isPresent(data.twitter.twitterCard));
+
+                setField('res-tw-title', data.twitter.twitterTitle);
+                setBadge('badge-tw-title', isPresent(data.twitter.twitterTitle));
+
+                setField('res-tw-desc', data.twitter.twitterDescription);
+                setBadge('badge-tw-desc', isPresent(data.twitter.twitterDescription));
+
+                // ── 4. Headings ─────────────────────────────
+                setField('res-h1', data.structure.h1);
+                const h1Badge = document.getElementById('badge-h1');
+                if (data.structure.h1 === 1) {
+                    h1Badge.className = 'badge badge-ok'; h1Badge.textContent = 'OK';
+                } else if (data.structure.h1 === 0) {
+                    h1Badge.className = 'badge badge-error'; h1Badge.textContent = 'Ausente';
+                } else {
+                    h1Badge.className = 'badge badge-warn'; h1Badge.textContent = 'Múltiplos';
+                }
+
+                setField('res-h2', data.structure.h2);
+                setBadge('badge-h2', data.structure.h2 > 0, `${data.structure.h2} tags`);
+
+                const h3Total = data.structure.h3 + (data.structure.h4 || 0);
+                setField('res-h3', h3Total);
+                setBadge('badge-h3', h3Total > 0, `${h3Total} tags`);
+
+                const h4plus = (data.structure.h4 || 0) + (data.structure.h5 || 0) + (data.structure.h6 || 0);
+                setField('res-h4plus', h4plus);
+                document.getElementById('badge-h4').textContent = `${h4plus} tags`;
+
+                // Hierarchy
+                const hierEl = document.getElementById('res-hierarchy');
+                const hierBadge = document.getElementById('badge-hierarchy');
+                if (data.structure.hierarchyOk) {
+                    hierEl.textContent = 'H1 → H2 → H3+';
+                    hierBadge.className = 'badge badge-ok'; hierBadge.textContent = 'Boa';
+                } else {
+                    hierEl.textContent = 'Hierarquia quebrada';
+                    hierBadge.className = 'badge badge-warn'; hierBadge.textContent = 'Atenção';
+                }
+
+                // ── 5. Imagens ──────────────────────────────
+                setField('res-img-total', data.images.total);
+                setBadge('badge-img-total', true, `${data.images.total}`);
+
+                setField('res-img-alt-ok', data.images.withAlt);
+                setBadge('badge-img-alt-ok', true, 'OK');
+
+                setField('res-img-alt-missing', data.images.withoutAlt);
+                const imgMissBadge = document.getElementById('badge-img-alt-missing');
+                if (data.images.withoutAlt === 0) {
+                    imgMissBadge.className = 'badge badge-ok'; imgMissBadge.textContent = 'Nenhuma';
+                } else {
+                    imgMissBadge.className = 'badge badge-warn'; imgMissBadge.textContent = `${data.images.withoutAlt} missing`;
+                }
+
+                // ── 6. Links ────────────────────────────────
+                setField('res-links-total', data.links.total);
+                setBadge('badge-links-total', true, `${data.links.total}`);
+
+                setField('res-links-int', data.links.internal);
+                setBadge('badge-links-int', true, `${data.links.internal}`);
+
+                setField('res-links-ext', data.links.external);
+                setBadge('badge-links-ext', true, `${data.links.external}`);
+
+                setField('res-links-nf', data.links.nofollow);
+                const nfBadge = document.getElementById('badge-links-nf');
+                if (data.links.nofollow > 0) {
+                    nfBadge.className = 'badge badge-ok'; nfBadge.textContent = `${data.links.nofollow}`;
+                } else {
+                    nfBadge.className = 'badge badge-ok'; nfBadge.textContent = '0';
+                }
+
+                // ── 7. Técnico ──────────────────────────────
+                setField('res-viewport', data.technical.viewport);
+                setBadge('badge-viewport', isPresent(data.technical.viewport));
+
+                setField('res-favicon', data.technical.favicon);
+                setBadge('badge-favicon', isPresent(data.technical.favicon));
+
+                setField('res-charset', data.technical.charset || '—');
+                const charsetBadge = document.getElementById('badge-charset');
+                if (isPresent(data.technical.charset)) {
+                    charsetBadge.className = 'badge badge-info';
+                    charsetBadge.textContent = data.technical.charset.toUpperCase();
+                } else {
+                    charsetBadge.className = 'badge badge-neutral';
+                    charsetBadge.textContent = 'Ausente';
+                }
+
+                setField('res-hreflang', data.technical.hreflang || '—');
+                setBadge('badge-hreflang', isPresent(data.technical.hreflang));
+
+                setField('res-author', data.technical.metaAuthor || '—');
+                setBadge('badge-author', isPresent(data.technical.metaAuthor));
+
+                setField('res-keywords', data.technical.metaKeywords || '—');
+                setBadge('badge-keywords', isPresent(data.technical.metaKeywords));
+
+                // Published time
+                const pubTime = data.technical.publishedTime;
+                if (isPresent(pubTime)) {
+                    try {
+                        const d = new Date(pubTime);
+                        setField('res-published', d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }));
+                    } catch {
+                        setField('res-published', pubTime);
+                    }
+                    setBadge('badge-published', true, 'OK');
+                } else {
+                    setField('res-published', '—');
+                    const pubBadge = document.getElementById('badge-published');
+                    pubBadge.className = 'badge badge-neutral';
+                    pubBadge.textContent = 'Ausente';
+                }
+
+                // ── 8. Dados Estruturados ───────────────────
+                const schemaDetected = data.schema.detected;
+                setField('res-schema', schemaDetected ? 'Detectado' : 'Não encontrado');
+                setBadge('badge-schema', schemaDetected, schemaDetected ? 'Encontrado' : 'Ausente');
+
+                const typesContainer = document.getElementById('res-schema-types');
+                const typesBadge = document.getElementById('badge-schema-types');
+                typesContainer.innerHTML = '';
+                if (data.schema.types && data.schema.types.length > 0) {
+                    typesBadge.className = 'badge badge-info';
+                    typesBadge.textContent = 'Encontrado';
+                    data.schema.types.forEach(type => {
+                        const tag = document.createElement('span');
+                        tag.className = 'schema-type-tag';
+                        tag.textContent = type;
+                        typesContainer.appendChild(tag);
+                    });
+                } else {
+                    typesBadge.className = 'badge badge-neutral';
+                    typesBadge.textContent = 'Nenhum';
+                    typesContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.82rem;">Nenhum schema detectado</span>';
+                }
+
+                resultsDiv.classList.add('active');
             } catch (err) {
                 alert('Erro ao analisar: ' + err.message);
             } finally {
-                loading.classList.add('hidden');
+                loading.classList.remove('active');
             }
+        }
+
+        // ── Lang Toggle (stub) ──────────────────────────────
+        function setLang(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
         }
     </script>
 </body>
