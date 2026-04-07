@@ -571,31 +571,34 @@
         }
 
         /* ── PDF Export Mode (High Contrast Light Mode) ── */
-        .pdf-mode { background-color: #ffffff !important; color: #0f172a !important; }
-        .pdf-mode .section-title { color: #0f172a !important; border-bottom: 2px solid #e2e8f0 !important; }
-        .pdf-mode .field-label { color: #475569 !important; font-weight: 600 !important; }
-        .pdf-mode .field-value { color: #0f172a !important; font-weight: 700 !important; }
-        .pdf-mode .field-value.truncate { color: #475569 !important; font-weight: 500 !important; }
-        .pdf-mode .field-card, .pdf-mode .stat-card, .pdf-mode .score-panel, .pdf-mode .score-cat {
+        body.pdf-mode-active #results { background-color: #ffffff !important; color: #0f172a !important; }
+        body.pdf-mode-active #results .section-title { color: #0f172a !important; border-bottom: 2px solid #e2e8f0 !important; }
+        body.pdf-mode-active #results .field-label { color: #475569 !important; font-weight: 600 !important; }
+        body.pdf-mode-active #results .field-value { color: #0f172a !important; font-weight: 700 !important; }
+        body.pdf-mode-active #results .field-value.truncate { color: #475569 !important; font-weight: 500 !important; }
+        body.pdf-mode-active #results .field-card, 
+        body.pdf-mode-active #results .stat-card, 
+        body.pdf-mode-active #results .score-panel, 
+        body.pdf-mode-active #results .score-cat {
             background-color: #f8fafc !important;
             border: 1px solid #cbd5e1 !important;
             color: #0f172a !important;
         }
-        .pdf-mode .field-header { border-bottom: 1px solid #e2e8f0 !important; }
-        .pdf-mode .score-label { color: #0f172a !important; font-weight: 800 !important; }
-        .pdf-mode .score-sublabel { color: #64748b !important; }
-        .pdf-mode .score-gauge .track { stroke: #e2e8f0 !important; }
-        .pdf-mode .score-max { color: #64748b !important; }
-        .pdf-mode .penalty-item { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
-        .pdf-mode .penalty-text { color: #881337 !important; font-weight: 600 !important; }
-        .pdf-mode .penalty-item.warning { background-color: #fffbeb !important; border: 1px solid #fde68a !important; }
-        .pdf-mode .penalty-item.warning .penalty-text { color: #78350f !important; font-weight: 600 !important; }
-        .pdf-mode .badge { font-weight: 800 !important; }
-        .pdf-mode .badge-ok { background-color: #dcfce7 !important; color: #166534 !important; }
-        .pdf-mode .badge-warn { background-color: #fef3c7 !important; color: #92400e !important; }
-        .pdf-mode .badge-error { background-color: #fee2e2 !important; color: #991b1b !important; }
-        .pdf-mode .badge-info { background-color: #dbeafe !important; color: #1e40af !important; }
-        .pdf-mode .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
+        body.pdf-mode-active #results .field-header { border-bottom: 1px solid #e2e8f0 !important; }
+        body.pdf-mode-active #results .score-label { color: #0f172a !important; font-weight: 800 !important; }
+        body.pdf-mode-active #results .score-sublabel { color: #64748b !important; }
+        body.pdf-mode-active #results .score-gauge .track { stroke: #e2e8f0 !important; }
+        body.pdf-mode-active #results .score-max { color: #64748b !important; }
+        body.pdf-mode-active #results .penalty-item { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+        body.pdf-mode-active #results .penalty-text { color: #881337 !important; font-weight: 600 !important; }
+        body.pdf-mode-active #results .penalty-item.warning { background-color: #fffbeb !important; border: 1px solid #fde68a !important; }
+        body.pdf-mode-active #results .penalty-item.warning .penalty-text { color: #78350f !important; font-weight: 600 !important; }
+        body.pdf-mode-active #results .badge { font-weight: 800 !important; }
+        body.pdf-mode-active #results .badge-ok { background-color: #dcfce7 !important; color: #166534 !important; }
+        body.pdf-mode-active #results .badge-warn { background-color: #fef3c7 !important; color: #92400e !important; }
+        body.pdf-mode-active #results .badge-error { background-color: #fee2e2 !important; color: #991b1b !important; }
+        body.pdf-mode-active #results .badge-info { background-color: #dbeafe !important; color: #1e40af !important; }
+        body.pdf-mode-active #results .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
     </style>
 </head>
 <body>
@@ -607,7 +610,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.3</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.4</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -1741,20 +1744,22 @@
                 }
                 const resultsEl = document.getElementById('results');
 
-                // Capture the results section with a Professional Light Theme specifically for the PDF
+                // Force browser to native repaint in Light Mode BEFORE capturing
+                document.body.classList.add('pdf-mode-active');
+                await new Promise(r => setTimeout(r, 50)); // let browser layout settle
+
+                // Capture the results section natively
                 const canvas = await html2canvas(resultsEl, {
                     backgroundColor: '#ffffff',
                     scale: 2, // Scale 2 is sufficient for sharpness and keeps size manageable
                     useCORS: true,
                     logging: false,
-                    windowWidth: 1100,
-                    onclone: (clonedDoc) => {
-                        const results = clonedDoc.getElementById('results');
-                        if (results) {
-                            results.classList.add('pdf-mode');
-                        }
-                    }
+                    windowWidth: 1100
                 });
+
+                // Revert original theme
+                document.body.classList.remove('pdf-mode-active');
+
 
                 // Compress image to JPEG to drastically reduce file size
                 const imgData = canvas.toDataURL('image/jpeg', 0.85);
