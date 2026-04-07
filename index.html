@@ -580,7 +580,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.0</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.1</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -1717,7 +1717,7 @@
                 // Capture the results section with a Professional Light Theme specifically for the PDF
                 const canvas = await html2canvas(resultsEl, {
                     backgroundColor: '#ffffff',
-                    scale: 3, 
+                    scale: 2, // Scale 2 is sufficient for sharpness and keeps size manageable
                     useCORS: true,
                     logging: false,
                     windowWidth: 1100,
@@ -1763,7 +1763,8 @@
                     }
                 });
 
-                const imgData = canvas.toDataURL('image/png');
+                // Compress image to JPEG to drastically reduce file size
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
                 const imgWidth = canvas.width;
                 const imgHeight = canvas.height;
 
@@ -1774,7 +1775,8 @@
                 const contentWidth = pdfWidth - margin * 2;
                 const contentHeight = (imgHeight * contentWidth) / imgWidth;
 
-                const pdf = new jsPDF('p', 'mm', 'a4');
+                // Create jsPDF with built-in compression enabled
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
 
                 // White background for the PDF document
                 pdf.setFillColor(255, 255, 255);
@@ -1803,7 +1805,7 @@
 
                 if (contentHeight <= availableHeight) {
                     // Fits in one page
-                    pdf.addImage(imgData, 'PNG', margin, headerOffset, contentWidth, contentHeight);
+                    pdf.addImage(imgData, 'JPEG', margin, headerOffset, contentWidth, contentHeight);
                 } else {
                     // Multiple pages
                     let yOffset = 0;
@@ -1830,9 +1832,9 @@
                         const ctx = tempCanvas.getContext('2d');
                         ctx.drawImage(canvas, 0, sourceY, imgWidth, tempCanvas.height, 0, 0, imgWidth, tempCanvas.height);
 
-                        const sliceData = tempCanvas.toDataURL('image/png');
+                        const sliceData = tempCanvas.toDataURL('image/jpeg', 0.85);
                         const sliceH = (tempCanvas.height * contentWidth) / imgWidth;
-                        pdf.addImage(sliceData, 'PNG', margin, startY, contentWidth, sliceH);
+                        pdf.addImage(sliceData, 'JPEG', margin, startY, contentWidth, sliceH);
 
                         yOffset += pageAvail;
                         isFirstPage = false;
