@@ -6,6 +6,8 @@
     <title>Analisador SEO Pro — Web Journalism Tool</title>
     <meta name="description" content="Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1052,10 +1054,6 @@
         </div><!-- /results -->
     </div><!-- /container -->
 
-    <!-- jsPDF + html2canvas CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-
     <script>
         // ── Helpers ─────────────────────────────────────────
         function setBadge(id, found, customLabel) {
@@ -1695,8 +1693,25 @@
             btn.disabled = true;
 
             try {
-                const jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
-                if (!jsPDF) throw new Error('Biblioteca jsPDF não encontrada. Verifique sua conexão.');
+                // Better detection for jsPDF
+                let jsPDF = null;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jsPDF = window.jspdf.jsPDF;
+                } else if (window.jsPDF) {
+                    jsPDF = window.jsPDF;
+                }
+
+                console.log('jsPDF Detection:', {
+                    hasWindowJspdf: !!window.jspdf,
+                    hasWindowJsPDF: !!window.jsPDF,
+                    resolved: !!jsPDF
+                });
+
+                if (!jsPDF) {
+                    // One last attempt to find it
+                    if (typeof window.jsPDF === 'function') jsPDF = window.jsPDF;
+                    else throw new Error('Biblioteca jsPDF não encontrada. Verifique sua conexão ou tente recarregar (F5).');
+                }
                 const resultsEl = document.getElementById('results');
 
                 // Capture the results section
