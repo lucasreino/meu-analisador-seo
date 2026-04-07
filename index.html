@@ -580,7 +580,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.1</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.3.2</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -1723,43 +1723,46 @@
                     windowWidth: 1100,
                     onclone: (clonedDoc) => {
                         // Override CSS variables specifically for the PDF document (Light Mode)
-                        const root = clonedDoc.documentElement;
-                        const results = clonedDoc.getElementById('results');
-                        if (results) {
-                            // Light theme color palette
-                            results.setAttribute('style', 'background-color: #ffffff !important; color: #1e293b !important;');
+                        // Injecting a hardcoded style block is the most reliable way to enforce styles in html2canvas
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = `
+                            /* Global Light Theme Overrides */
+                            #results, .container, body { background-color: #ffffff !important; color: #0f172a !important; }
                             
-                            // Apply light mode variables to the results container scope
-                            results.style.setProperty('--bg-body', '#ffffff');
-                            results.style.setProperty('--bg-card', '#f8fafc');
-                            results.style.setProperty('--bg-field', '#f1f5f9');
-                            results.style.setProperty('--border-card', '#cbd5e1');
-                            results.style.setProperty('--border-field', '#e2e8f0');
-                            results.style.setProperty('--text-primary', '#0f172a');
-                            results.style.setProperty('--text-secondary', '#475569');
-                            results.style.setProperty('--text-muted', '#64748b');
-                            results.style.setProperty('--text-label', '#94a3b8');
+                            /* Typography & Borders */
+                            #results .section-title { color: #0f172a !important; border-bottom: 2px solid #e2e8f0 !important; }
+                            #results .field-label { color: #475569 !important; font-weight: 600 !important; }
+                            #results .field-value { color: #0f172a !important; }
+                            #results .field-value.truncate { color: #475569 !important; }
                             
-                            // High contrast badges for light background
-                            results.style.setProperty('--badge-ok-bg', '#d1fae5');
-                            results.style.setProperty('--badge-ok-text', '#065f46');
-                            results.style.setProperty('--badge-warn-bg', '#ffedd5');
-                            results.style.setProperty('--badge-warn-text', '#9a3412');
-                            results.style.setProperty('--badge-error-bg', '#fee2e2');
-                            results.style.setProperty('--badge-error-text', '#991b1b');
-                            results.style.setProperty('--badge-info-bg', '#e0f2fe');
-                            results.style.setProperty('--badge-info-text', '#075985');
-                            results.style.setProperty('--badge-neutral-bg', '#f1f5f9');
-                            results.style.setProperty('--badge-neutral-text', '#475569');
+                            /* Cards */
+                            #results .field-card, #results .stat-card, #results .score-panel, #results .score-cat { 
+                                background-color: #f8fafc !important; 
+                                border: 1px solid #cbd5e1 !important; 
+                                color: #0f172a !important; 
+                            }
+                            #results .field-header { border-bottom: 1px solid #e2e8f0 !important; }
+                            
+                            /* Score Gauge specific */
+                            #results .score-label { color: #0f172a !important; font-weight: 800 !important; }
+                            #results .score-sublabel { color: #64748b !important; }
+                            #results .score-gauge .track { stroke: #e2e8f0 !important; }
+                            #results .score-max { color: #64748b !important; }
+                            
+                            /* Penalty Items */
+                            #results .penalty-item { background: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+                            #results .penalty-item .penalty-text { color: #881337 !important; font-weight: 600 !important;}
+                            #results .penalty-item.warning { background: #fffbeb !important; border: 1px solid #fde68a !important; }
+                            #results .penalty-item.warning .penalty-text { color: #78350f !important; }
 
-                            // Important for the Gauge visibility in light theme
-                            const gaugeTrack = clonedDoc.querySelector('.score-gauge .track');
-                            if (gaugeTrack) gaugeTrack.style.stroke = '#e2e8f0';
-
-                            // Ensure all texts inside cards are dark
-                            const allTexts = results.querySelectorAll('.field-value, .field-label, .section-title, .score-label');
-                            allTexts.forEach(el => el.style.color = 'inherit');
-                        }
+                            /* Badges */
+                            #results .badge-ok { background-color: #dcfce7 !important; color: #166534 !important; }
+                            #results .badge-warn { background-color: #fef3c7 !important; color: #92400e !important; }
+                            #results .badge-error { background-color: #fee2e2 !important; color: #991b1b !important; }
+                            #results .badge-info { background-color: #dbeafe !important; color: #1e40af !important; }
+                            #results .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
+                        `;
+                        clonedDoc.head.appendChild(style);
                     }
                 });
 
