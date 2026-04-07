@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Analisador SEO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Analisador SEO</h1>
+        
+        <div class="flex gap-2 mb-12">
+            <input type="text" id="urlInput" placeholder="https://exemplo.com" class="flex-1 p-3 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500">
+            <button onclick="analisar()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-bold transition">Analisar Link</button>
+        </div>
+
+        <div id="loading" class="hidden text-center text-blue-400 mb-4">Analisando site...</div>
+
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-blue-400 font-bold mb-4 uppercase text-sm tracking-widest">SEO Básico</h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-slate-400">Título da Página</p>
+                        <p id="res-title" class="font-medium text-green-400"></p>
+                        <p id="res-title-len" class="text-xs mt-1 text-slate-500"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Meta Description</p>
+                        <p id="res-desc" class="text-sm"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-purple-400 font-bold mb-4 uppercase text-sm tracking-widest">Estrutura</h2>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-slate-900 p-3 rounded">
+                        <p class="text-2xl font-bold" id="res-h1">0</p>
+                        <p class="text-xs text-slate-500">TAGS H1</p>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded">
+                        <p class="text-2xl font-bold" id="res-h2">0</p>
+                        <p class="text-xs text-slate-500">TAGS H2</p>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded">
+                        <p class="text-2xl font-bold" id="res-img-alt">0</p>
+                        <p class="text-xs text-slate-500">IMG SEM ALT</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analisar() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) return alert('Digite uma URL');
+
+            const loading = document.getElementById('loading');
+            const resultsDiv = document.getElementById('results');
+            
+            loading.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                document.getElementById('res-title').innerText = data.basic.title;
+                document.getElementById('res-title-len').innerText = `${data.basic.titleLength} caracteres`;
+                document.getElementById('res-desc').innerText = data.basic.description;
+                document.getElementById('res-h1').innerText = data.headings.h1;
+                document.getElementById('res-h2').innerText = data.headings.h2;
+                document.getElementById('res-img-alt').innerText = data.images.missingAlt;
+
+                resultsDiv.classList.remove('hidden');
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
