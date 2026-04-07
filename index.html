@@ -580,7 +580,7 @@
 
     <div class="container">
         <header class="header">
-            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.2.6</span></h1>
+            <h1>Analisador SEO <span style="font-size: 0.8rem; font-weight: 500; vertical-align: middle; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 20px; color: var(--accent-blue); margin-left: 10px;">v1.2.7</span></h1>
             <p>Analise a estrutura de SEO do HTML original renderizado — o mesmo HTML que o Google lê.</p>
         </header>
 
@@ -1714,13 +1714,31 @@
                 }
                 const resultsEl = document.getElementById('results');
 
-                // Capture the results section
+                // Capture the results section with improved contrast and scale
                 const canvas = await html2canvas(resultsEl, {
                     backgroundColor: '#0a0e1a',
-                    scale: 2,
+                    scale: 3, // Higher scale for extreme sharpness
                     useCORS: true,
                     logging: false,
-                    windowWidth: 1100
+                    windowWidth: 1100,
+                    onclone: (clonedDoc) => {
+                        // Boost contrast for PDF readability
+                        const results = clonedDoc.getElementById('results');
+                        if (results) {
+                            results.style.color = '#ffffff'; // Force white text for better contrast
+                            // Make cards slightly more visible
+                            const cards = results.querySelectorAll('.field-card, .stat-card, .score-panel, .score-cat');
+                            cards.forEach(card => {
+                                card.style.borderColor = '#334155'; // Brighter border
+                                card.style.background = '#1a2333'; // Slightly lighter background for cards
+                            });
+                            // Ensure all badges are bright
+                            const badges = results.querySelectorAll('.badge');
+                            badges.forEach(b => {
+                                b.style.fontWeight = '800';
+                            });
+                        }
+                    }
                 });
 
                 const imgData = canvas.toDataURL('image/png');
