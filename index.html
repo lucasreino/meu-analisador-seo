@@ -724,6 +724,79 @@
                 </div>
             </div>
 
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- 9. Google News                             -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="section">
+                <div class="section-title"><span class="icon">📰</span> Google News — Boas Práticas</div>
+                <div class="fields-grid">
+                    <!-- Data de Modificação -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Data de Modificação</span>
+                            <span id="badge-gn-datemod" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-gn-datemod" class="field-value">—</div>
+                    </div>
+                    <!-- Headline no Schema -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Headline no Schema</span>
+                            <span id="badge-gn-headline" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-gn-headline" class="field-value truncate">—</div>
+                    </div>
+                    <!-- Headline Comprimento -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Caracteres do Headline</span>
+                            <span id="badge-gn-headline-len" class="badge badge-neutral">—</span>
+                        </div>
+                        <div id="res-gn-headline-len" class="field-value">—</div>
+                    </div>
+                    <!-- isAccessibleForFree -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">isAccessibleForFree</span>
+                            <span id="badge-gn-free" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-gn-free" class="field-value">—</div>
+                    </div>
+                    <!-- Author URL -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Author URL (Schema)</span>
+                            <span id="badge-gn-author-url" class="badge badge-neutral">Ausente</span>
+                        </div>
+                        <div id="res-gn-author-url" class="field-value mono truncate">—</div>
+                    </div>
+                    <!-- Title vs H1 Match -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Title × H1 Match</span>
+                            <span id="badge-gn-title-h1" class="badge badge-neutral">—</span>
+                        </div>
+                        <div id="res-gn-title-h1" class="field-value">—</div>
+                    </div>
+                    <!-- Palavras no Título -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Palavras no Título</span>
+                            <span id="badge-gn-title-words" class="badge badge-neutral">—</span>
+                        </div>
+                        <div id="res-gn-title-words" class="field-value">—</div>
+                    </div>
+                    <!-- Meta Refresh -->
+                    <div class="field-card">
+                        <div class="field-header">
+                            <span class="field-label">Meta Refresh</span>
+                            <span id="badge-gn-meta-refresh" class="badge badge-ok">Ausente ✓</span>
+                        </div>
+                        <div id="res-gn-meta-refresh" class="field-value">—</div>
+                    </div>
+                </div>
+            </div>
+
         </div><!-- /results -->
     </div><!-- /container -->
 
@@ -1016,6 +1089,114 @@
                     typesBadge.className = 'badge badge-neutral';
                     typesBadge.textContent = 'Nenhum';
                     typesContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.82rem;">Nenhum schema detectado</span>';
+                }
+
+                // ── 9. Google News ──────────────────────────
+                if (data.googleNews) {
+                    const gn = data.googleNews;
+
+                    // Data de Modificação
+                    if (gn.dateModified) {
+                        try {
+                            const d = new Date(gn.dateModified);
+                            setField('res-gn-datemod', d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+                        } catch {
+                            setField('res-gn-datemod', gn.dateModified);
+                        }
+                        setBadge('badge-gn-datemod', true, 'Encontrada');
+                    } else {
+                        setField('res-gn-datemod', 'Não encontrada');
+                        const b = document.getElementById('badge-gn-datemod');
+                        b.className = 'badge badge-warn'; b.textContent = 'Ausente';
+                    }
+
+                    // Headline no Schema
+                    if (gn.schemaHeadline) {
+                        setField('res-gn-headline', gn.schemaHeadline);
+                        setBadge('badge-gn-headline', true, 'Encontrado');
+                    } else {
+                        setField('res-gn-headline', 'Não encontrado no JSON-LD');
+                        const b = document.getElementById('badge-gn-headline');
+                        b.className = 'badge badge-warn'; b.textContent = 'Ausente';
+                    }
+
+                    // Headline Length (≤110 recommended by Google)
+                    if (gn.schemaHeadlineLength > 0) {
+                        setField('res-gn-headline-len', `${gn.schemaHeadlineLength} caracteres`);
+                        const b = document.getElementById('badge-gn-headline-len');
+                        if (gn.schemaHeadlineLength <= 110) {
+                            b.className = 'badge badge-ok'; b.textContent = '≤110 · Ideal';
+                        } else {
+                            b.className = 'badge badge-warn'; b.textContent = '>110 · Longo';
+                        }
+                    } else {
+                        setField('res-gn-headline-len', '—');
+                        const b = document.getElementById('badge-gn-headline-len');
+                        b.className = 'badge badge-neutral'; b.textContent = 'Sem headline';
+                    }
+
+                    // isAccessibleForFree
+                    if (gn.isAccessibleForFree !== null && gn.isAccessibleForFree !== undefined) {
+                        const isFree = gn.isAccessibleForFree === true || gn.isAccessibleForFree === 'True' || gn.isAccessibleForFree === 'true';
+                        setField('res-gn-free', isFree ? 'Sim — Conteúdo gratuito' : 'Não — Conteúdo com paywall');
+                        const b = document.getElementById('badge-gn-free');
+                        if (isFree) {
+                            b.className = 'badge badge-ok'; b.textContent = 'Gratuito';
+                        } else {
+                            b.className = 'badge badge-info'; b.textContent = 'Paywall';
+                        }
+                    } else {
+                        setField('res-gn-free', 'Não declarado no schema');
+                        const b = document.getElementById('badge-gn-free');
+                        b.className = 'badge badge-warn'; b.textContent = 'Ausente';
+                    }
+
+                    // Author URL
+                    if (gn.authorUrl) {
+                        setField('res-gn-author-url', gn.authorUrl);
+                        setBadge('badge-gn-author-url', true, 'Encontrado');
+                    } else {
+                        setField('res-gn-author-url', 'Não encontrado no JSON-LD');
+                        const b = document.getElementById('badge-gn-author-url');
+                        b.className = 'badge badge-warn'; b.textContent = 'Ausente';
+                    }
+
+                    // Title × H1 Match
+                    const h1Badge = document.getElementById('badge-gn-title-h1');
+                    if (gn.titleH1Similarity === 'exact') {
+                        setField('res-gn-title-h1', 'Título e H1 são idênticos ✓');
+                        h1Badge.className = 'badge badge-ok'; h1Badge.textContent = 'Match exato';
+                    } else if (gn.titleH1Similarity === 'partial') {
+                        setField('res-gn-title-h1', 'Título contém o H1 (ou vice-versa)');
+                        h1Badge.className = 'badge badge-ok'; h1Badge.textContent = 'Match parcial';
+                    } else if (gn.titleH1Similarity === 'mismatch') {
+                        setField('res-gn-title-h1', `H1: "${gn.h1Text}"`);
+                        h1Badge.className = 'badge badge-warn'; h1Badge.textContent = 'Divergente';
+                    } else {
+                        setField('res-gn-title-h1', 'Nenhum H1 encontrado na página');
+                        h1Badge.className = 'badge badge-error'; h1Badge.textContent = 'Sem H1';
+                    }
+
+                    // Palavras no Título (2-22 recommended)
+                    const twBadge = document.getElementById('badge-gn-title-words');
+                    setField('res-gn-title-words', `${gn.titleWordCount} palavras`);
+                    if (gn.titleWordCount >= 2 && gn.titleWordCount <= 22) {
+                        twBadge.className = 'badge badge-ok'; twBadge.textContent = '2-22 · Ideal';
+                    } else if (gn.titleWordCount < 2) {
+                        twBadge.className = 'badge badge-error'; twBadge.textContent = 'Muito curto';
+                    } else {
+                        twBadge.className = 'badge badge-warn'; twBadge.textContent = '>22 · Longo';
+                    }
+
+                    // Meta Refresh
+                    const mrBadge = document.getElementById('badge-gn-meta-refresh');
+                    if (gn.metaRefresh) {
+                        setField('res-gn-meta-refresh', `Detectado: ${gn.metaRefresh}`);
+                        mrBadge.className = 'badge badge-error'; mrBadge.textContent = 'Detectado ✗';
+                    } else {
+                        setField('res-gn-meta-refresh', 'Nenhum meta refresh detectado');
+                        mrBadge.className = 'badge badge-ok'; mrBadge.textContent = 'Ausente ✓';
+                    }
                 }
 
                 resultsDiv.classList.add('active');

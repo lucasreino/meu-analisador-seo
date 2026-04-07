@@ -140,6 +140,80 @@ module.exports = async (req, res) => {
         };
         jsonLd.forEach(item => extractTypes(item));
 
+        // ── Google News — Extrações do JSON-LD ──────────────────
+        let schemaDateModified = '';
+        let schemaHeadline = '';
+        let schemaIsAccessibleForFree = null;
+        let schemaAuthorUrl = '';
+
+        const extractGoogleNewsFields = (obj) => {
+            if (!obj) return;
+            if (Array.isArray(obj)) {
+                obj.forEach(item => extractGoogleNewsFields(item));
+                return;
+            }
+            if (typeof obj === 'object') {
+                // dateModified
+                if (obj['dateModified'] && !schemaDateModified) {
+                    schemaDateModified = obj['dateModified'];
+                }
+                // headline
+                if (obj['headline'] && !schemaHeadline) {
+                    schemaHeadline = obj['headline'];
+                }
+                // isAccessibleForFree
+                if (obj['isAccessibleForFree'] !== undefined && schemaIsAccessibleForFree === null) {
+                    schemaIsAccessibleForFree = obj['isAccessibleForFree'];
+                }
+                // author.url
+                if (obj['author'] && !schemaAuthorUrl) {
+                    const author = Array.isArray(obj['author']) ? obj['author'][0] : obj['author'];
+                    if (author && typeof author === 'object' && author['url']) {
+                        schemaAuthorUrl = author['url'];
+                    }
+                }
+                // Recurse into @graph and nested objects
+                if (obj['@graph']) extractGoogleNewsFields(obj['@graph']);
+                Object.values(obj).forEach(val => {
+                    if (typeof val === 'object') extractGoogleNewsFields(val);
+                });
+            }
+        };
+        jsonLd.forEach(item => extractGoogleNewsFields(item));
+
+        // dateModified fallback: meta tag article:modified_time
+        const metaModifiedTime = $('meta[property="article:modified_time"]').attr('content') || '';
+        const dateModified = schemaDateModified || metaModifiedTime;
+
+        // Title vs H1 match (Google recommends <title> should match <h1>)
+        const h1Text = $('h1').first().text().trim();
+        let titleH1Match = false;
+        let titleH1Similarity = 'no_h1';
+        if (h1Text && title) {
+            const normalizeStr = (s) => s.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+            const normTitle = normalizeStr(title);
+            const normH1 = normalizeStr(h1Text);
+            if (normTitle === normH1) {
+                titleH1Match = true;
+                titleH1Similarity = 'exact';
+            } else if (normTitle.includes(normH1) || normH1.includes(normTitle)) {
+                titleH1Match = true;
+                titleH1Similarity = 'partial';
+            } else {
+                titleH1Match = false;
+                titleH1Similarity = 'mismatch';
+            }
+        } else if (!h1Text) {
+            titleH1Similarity = 'no_h1';
+        }
+
+        // Title word count (Google recommends 2-22 words)
+        const titleWords = title ? title.split(/\s+/).filter(w => w.length > 0) : [];
+        const titleWordCount = titleWords.length;
+
+        // Meta refresh detection (Google says: avoid meta refreshes)
+        const metaRefresh = $('meta[http-equiv="refresh"]').attr('content') || '';
+
         // ── Resultado Final ─────────────────────────────────────
         const results = {
             analyzedUrl: targetUrl,
@@ -200,6 +274,18 @@ module.exports = async (req, res) => {
             schema: {
                 detected: jsonLd.length > 0,
                 types: [...schemaTypes]
+            },
+            googleNews: {
+                dateModified: dateModified || '',
+                schemaHeadline: schemaHeadline || '',
+                schemaHeadlineLength: schemaHeadline ? schemaHeadline.length : 0,
+                isAccessibleForFree: schemaIsAccessibleForFree,
+                authorUrl: schemaAuthorUrl || '',
+                titleH1Match,
+                titleH1Similarity,
+                h1Text: h1Text || '',
+                titleWordCount,
+                metaRefresh: metaRefresh || ''
             }
         };
 
